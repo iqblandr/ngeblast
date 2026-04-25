@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard WA Blast</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: #1e293b; padding: 30px; border-radius: 15px; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
+        button:disabled { background: #475569; }
+        #res { display: none; margin-top: 20px; padding: 15px; background: #0f172a; border: 1px dashed #38bdf8; border-radius: 8px; }
+        .code { font-size: 24px; font-weight: bold; color: #22c55e; margin-top: 10px; letter-spacing: 3px; }
+        #loading { display: none; margin-top: 10px; font-size: 12px; color: #fbbf24; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h3>Tautkan Perangkat</h3>
+        <p style="font-size: 12px; color: #94a3b8;">Masukkan nomor WA (format 62) untuk mendapatkan kode pairing.</p>
+        <input type="number" id="num" placeholder="628xxxxxxxx">
+        <button id="btn" onclick="go()">Dapatkan Kode</button>
+        <div id="loading">Sedang memproses ke server lama...</div>
+        <div id="res">
+            <div style="font-size: 11px; color: #94a3b8;">MASUKKAN KODE INI DI WA:</div>
+            <div class="code" id="cd">--------</div>
+        </div>
+    </div>
+    <script>
+        async function go() {
+            const n = document.getElementById('num').value;
+            if(!n) return alert("Nomor WA wajib diisi!");
+            const btn = document.getElementById('btn');
+            const load = document.getElementById('loading');
+            const res = document.getElementById('res');
+            
+            btn.disabled = true;
+            load.style.display = 'block';
+            res.style.display = 'none';
+            
+            try {
+                const r = await fetch('/get-code', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ number: n })
+                });
+                const d = await r.json();
+                if(d.success) {
+                    document.getElementById('cd').innerText = d.code;
+                    res.style.display = 'block';
+                } else { alert("Gagal: " + d.message); }
+            } catch (e) { alert("Server error, coba lagi nanti."); }
+            
+            btn.disabled = false;
+            load.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
